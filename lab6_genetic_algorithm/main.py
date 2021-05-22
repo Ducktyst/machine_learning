@@ -14,14 +14,6 @@ from lab6_genetic_algorithm.nutrition_entities import Product
 известно m характеристик. Необходимо получить самый лучший по 
 характеристикам рацион из k наименований, удовлетворяющий заданным
  ценовым рамкам. Лучшим считается рацион с минимальным отклонением от нормы
-
-N - размер популяции 
-m - количество характеристик продукта
-
-k - длина битовой строки, где каждому биту соответсвтвует продукт 
-    k - количество активных генов в наборе?
-
-цена - одна из характеристик
 """
 
 # константы задачи
@@ -29,8 +21,8 @@ TOTAL_PRODUCTS_COUNT = 400  # N - ассортимент продуктов
 
 # константы генетического алгоритма
 PRODUCT_COMBINATION_SIZE = 7  # количество индивидуумов в популяции (количество комбинаций продуктов == кол-во хромосом, допустимых решений)
-P_CROSSOVER = 0.05  # вероятность скрещивания
-P_MUTATION = 0.05  # вероятность мутации индивидуума
+P_CROSSOVER = 0.5  # вероятность скрещивания
+P_MUTATION = 0.5  # вероятность мутации индивидуума
 
 POPULATION_SIZE = 50  # количество особей (продуктовых наборов в популяции)
 
@@ -97,7 +89,7 @@ while generationCounter < MAX_GENERATIONS:
     fitness_values = [product_combination.calc_fitness()
                       for product_combination in population]
     best_fitness = min(fitness_values)
-    mean_fitness = sum(fitness_values)
+    mean_fitness = sum(fitness_values) / len(population)
 
     best_fitness_values.append(best_fitness)
     mean_fitness_values.append(mean_fitness)

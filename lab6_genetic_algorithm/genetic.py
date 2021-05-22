@@ -27,32 +27,9 @@ def mutate_product_combination(mutant, all_products, ethalon, indpb=0.05):
     return mutant
 
 
-def mutate_product_combination_save_len(mutant, all_products, indpb=0.01):
-    """ Мутация одного гена, при сохранении количества продуктов"""
-    assert isinstance(mutant, ProductCombination)
-    mutant_len = len(mutant)
-
-    mutate_products_count = 4  # количество измееенных продуктов
-    while mutate_products_count > 0:
-        for product in all_products:  # не гарантирует, что будет изменено именно 4 продукта
-            # ограничивает...
-            if random.random() < indpb:
-                if product in mutant:
-                    if mutate_products_count == 0:
-                        break
-                    mutant.remove(product)
-                    mutate_products_count += 1
-                else:
-                    if mutate_products_count == 0:
-                        break
-                    mutant.append(product)
-                    mutate_products_count -= 1
-
-    assert len(mutant) == mutant_len
-
-
 def crossover(product_combination1, product_combination2,
               product_combination_size, all_products, ethalon):
+    """ Одноточечный кроссовер"""
     crossover_point = random.randint(1, product_combination_size - 1 - 2)
 
     new_product_combination = ProductCombination(ethalon)
@@ -79,6 +56,7 @@ def crossover(product_combination1, product_combination2,
 
 def crossover_2p(product_combination1, product_combination2, all_products,
                  ethalon):
+    """ Двухточечный кроссовер"""
     p1 = int(len(all_products) / 3)
     p2 = int(len(all_products) / 3 * 2)
 
@@ -107,43 +85,6 @@ def crossover_2p(product_combination1, product_combination2, all_products,
     return new_product_combination
 
 
-def selTournament(population, p_len, p_survive=0.05):
-    """
-    Формирует новую популяцию из продуктовых наборов
-
-    :param population: исходная популяия
-    :param p_len: длина новой популяции
-    :return:
-    """
-    offspring = []
-    """"""
-    for n in range(p_len):
-        pc1_idx = random.randint(0, int((len(population) - 1) / 2))
-        product_combination_1 = population[pc1_idx]
-        pc2_idx = random.randint(int((len(population) - 1) / 2),
-                                 len(population) - 1)
-        product_combination_2 = population[pc2_idx]
-
-        while not product_combination_1.is_fit_in_price():
-            product_combination_1 = \
-                population[random.randint(0, len(population) - 1)]
-
-        while not product_combination_2.is_fit_in_price():
-            product_combination_2 = \
-                population[random.randint(0, len(population) - 1)]
-
-        if random.random() >= p_survive:  # выживает сильнейшая особь
-            strognest = max([product_combination_1, product_combination_2],
-                            key=lambda pc: product_combination_1.calc_fitness())
-            offspring.append(strognest)
-        else:
-            weakest = min([product_combination_1, product_combination_2],
-                          key=lambda pc: pc.calc_fitness())
-            offspring.append(weakest)
-
-    return offspring
-
-
 def ranged_selection(population, p_len):
     """ Ранговый отбор"""
     offspring = population[:]
@@ -152,12 +93,17 @@ def ranged_selection(population, p_len):
         weakest = max(offspring,key=lambda pc: pc.calc_fitness())
         offspring.remove(weakest)
 
-
     return offspring
 
 
+def tournament_selection(population, p_len, p_survive=0.8):
+    """ Турнирный отбор
 
-def tournament_selection(population, p_len):
+    :param population:
+    :param p_len:
+    :param p_survive: вероятность выживания наиболее приспособленной особи
+    :return:
+    """
     offspring = population[:]
 
     while len(offspring) > p_len:
@@ -167,13 +113,15 @@ def tournament_selection(population, p_len):
         pc2_idx = random.randint(0, len(offspring))
         product_combination_2 = offspring[pc2_idx]
 
-        weakest = max([product_combination_1, product_combination_2],
-                      key=lambda pc: pc.calc_fitness())
-
-        try:
+        if random.random() >= p_survive:  # выживает сильнейшая особь
+            stongest = max([product_combination_1, product_combination_2],
+                            key=lambda pc: product_combination_1.calc_fitness())
+            offspring.remove(stongest)
+        else:
+            weakest = min([product_combination_1, product_combination_2],
+                          key=lambda pc: pc.calc_fitness())
             offspring.remove(weakest)
-        except ValueError:
-            pass
+
 
     return offspring
 
